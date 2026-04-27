@@ -1,0 +1,36 @@
+# 后端
+backend/*.exe
+backend/*.exe~
+backend/*.dll
+backend/*.so
+backend/*.dylib
+backend/test
+backend/*.test
+backend/*.out
+backend/go.work
+backend/uploads/
+backend/.env
+backend/.env.*
+
+# 前端
+frontend/node_modules/
+frontend/dist/
+frontend/.DS_Store
+frontend/local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/.env.local
+frontend/.env.*.local
+frontend/cache/
+
+# 通用
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.env
+.env.*
