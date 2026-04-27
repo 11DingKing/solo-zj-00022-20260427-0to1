@@ -100,6 +100,7 @@ export interface TechnicianRanking {
   technician_id: number
   technician_name: string
   completed_count: number
+  avg_processing_time: number
 }
 
 export interface ApiResponse<T = any> {

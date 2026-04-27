@@ -82,9 +82,17 @@
               </template>
             </el-table-column>
             <el-table-column prop="technician_name" label="技师姓名" />
-            <el-table-column prop="completed_count" label="完成工单数">
+            <el-table-column prop="completed_count" label="完成工单数" width="150">
               <template #default="{ row }">
                 <el-badge :value="row.completed_count" class="item" :type="row.completed_count > 0 ? 'primary' : 'info'" />
+              </template>
+            </el-table-column>
+            <el-table-column prop="avg_processing_time" label="平均处理时长(分钟)" width="180">
+              <template #default="{ row }">
+                <el-tag type="success" v-if="row.avg_processing_time > 0">
+                  {{ formatAvgTime(row.avg_processing_time) }}
+                </el-tag>
+                <span v-else>-</span>
               </template>
             </el-table-column>
           </el-table>
@@ -127,6 +135,11 @@ const faultTypeMap: Record<string, string> = {
   software: '软件问题',
   network: '网络异常',
   other: '其他'
+}
+
+const formatAvgTime = (time: number) => {
+  if (!time || time <= 0) return '-'
+  return time.toFixed(1)
 }
 
 const fetchData = async () => {

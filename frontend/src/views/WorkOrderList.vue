@@ -13,7 +13,7 @@
 
       <el-form :inline="true" :model="searchForm" class="search-form">
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="全部状态" clearable>
+          <el-select v-model="searchForm.status" placeholder="全部状态" clearable @change="handleFilterChange">
             <el-option label="待分配" value="pending_assign" />
             <el-option label="已分配" value="assigned" />
             <el-option label="处理中" value="processing" />
@@ -22,7 +22,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="紧急程度">
-          <el-select v-model="searchForm.urgency" placeholder="全部" clearable>
+          <el-select v-model="searchForm.urgency" placeholder="全部" clearable @change="handleFilterChange">
             <el-option label="低" value="low" />
             <el-option label="中" value="medium" />
             <el-option label="高" value="high" />
@@ -30,7 +30,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="故障类型">
-          <el-select v-model="searchForm.fault_type" placeholder="全部" clearable>
+          <el-select v-model="searchForm.fault_type" placeholder="全部" clearable @change="handleFilterChange">
             <el-option label="硬件故障" value="hardware" />
             <el-option label="软件问题" value="software" />
             <el-option label="网络异常" value="network" />
@@ -45,6 +45,7 @@
             start-placeholder="开始日期"
             end-placeholder="结束日期"
             value-format="YYYY-MM-DD"
+            @change="handleFilterChange"
           />
         </el-form-item>
         <el-form-item>
@@ -206,6 +207,11 @@ const fetchWorkOrders = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const handleFilterChange = () => {
+  currentPage.value = 1
+  fetchWorkOrders()
 }
 
 const handleSearch = () => {

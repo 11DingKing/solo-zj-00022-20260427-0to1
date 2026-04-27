@@ -26,9 +26,10 @@ type DailyTrend struct {
 }
 
 type TechnicianRanking struct {
-	TechnicianID   uint   `json:"technician_id"`
-	TechnicianName string `json:"technician_name"`
-	CompletedCount int64  `json:"completed_count"`
+	TechnicianID      uint    `json:"technician_id"`
+	TechnicianName    string  `json:"technician_name"`
+	CompletedCount    int64   `json:"completed_count"`
+	AvgProcessingTime float64 `json:"avg_processing_time"`
 }
 
 func GetDashboardStats(c *gin.Context) {
@@ -98,10 +99,16 @@ func GetTechnicianRanking(c *gin.Context) {
 	var rankings []TechnicianRanking
 
 	utils.DB.Model(&models.WorkOrder{}).
-		Select("work_orders.technician_id, users.real_name as technician_name, COUNT(*) as completed_count").
+		Select(
+			"work_orders.technician_id, "+
+				"users.real_name as technician_name, "+
+				"COUNT(*) as completed_count, "+
+				"AVG(work_orders.repair_duration) as avg_processing_time",
+		).
 		Joins("LEFT JOIN users ON work_orders.technician_id = users.id").
 		Where("work_orders.status = ?", models.StatusClosed).
 		Where("work_orders.technician_id IS NOT NULL").
+		Where("work_orders.repair_duration IS NOT NULL").
 		Group("work_orders.technician_id, users.real_name").
 		Order("completed_count DESC").
 		Limit(10).
