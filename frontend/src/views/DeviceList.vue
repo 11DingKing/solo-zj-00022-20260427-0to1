@@ -102,22 +102,24 @@
         <el-form-item label="位置">
           <el-input v-model="form.location" placeholder="请输入位置" />
         </el-form-item>
-        <el-form-item label="购入日期">
+        <el-form-item label="购入日期" prop="purchase_date">
           <el-date-picker
             v-model="form.purchase_date"
             type="date"
             placeholder="选择日期"
             value-format="YYYY-MM-DD"
             style="width: 100%"
+            @change="handlePurchaseDateChange"
           />
         </el-form-item>
-        <el-form-item label="保修到期日">
+        <el-form-item label="保修到期日" prop="warranty_expire_date">
           <el-date-picker
             v-model="form.warranty_expire_date"
             type="date"
             placeholder="选择日期"
             value-format="YYYY-MM-DD"
             style="width: 100%"
+            :disabled-date="disabledWarrantyDate"
           />
         </el-form-item>
         <el-form-item label="状态">
@@ -137,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { deviceApi } from '@/api'
@@ -176,9 +178,45 @@ const form = reactive({
   status: 'active' as DeviceStatus
 })
 
+const validateWarrantyDate = (rule: any, value: string, callback: any) => {
+  if (form.purchase_date && value) {
+    const purchaseDate = new Date(form.purchase_date)
+    const warrantyDate = new Date(value)
+    if (warrantyDate < purchaseDate) {
+      callback(new Error('保修到期日不能早于购入日期'))
+      return
+    }
+  }
+  callback()
+}
+
 const rules: FormRules = {
   device_code: [{ required: true, message: '请输入设备编号', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入设备名称', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入设备名称', trigger: 'blur' }],
+  warranty_expire_date: [
+    { validator: validateWarrantyDate, trigger: 'change' }
+  ]
+}
+
+const disabledWarrantyDate = computed(() => {
+  return (date: Date) => {
+    if (form.purchase_date) {
+      const purchaseDate = new Date(form.purchase_date)
+      purchaseDate.setHours(0, 0, 0, 0)
+      return date < purchaseDate
+    }
+    return false
+  }
+})
+
+const handlePurchaseDateChange = () => {
+  if (form.purchase_date && form.warranty_expire_date) {
+    const purchaseDate = new Date(form.purchase_date)
+    const warrantyDate = new Date(form.warranty_expire_date)
+    if (warrantyDate < purchaseDate) {
+      form.warranty_expire_date = ''
+    }
+  }
 }
 
 const statusLabelMap: Record<string, string> = {

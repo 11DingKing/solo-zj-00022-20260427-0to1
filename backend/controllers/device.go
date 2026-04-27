@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"repair-system/models"
 	"repair-system/utils"
@@ -97,6 +98,37 @@ func GetDeviceByID(c *gin.Context) {
 	})
 }
 
+func validateWarrantyDate(purchaseDate, warrantyExpireDate string, existingPurchaseDate, existingWarrantyExpireDate *time.Time) error {
+	var purchase *time.Time
+	var warranty *time.Time
+
+	if purchaseDate != "" {
+		t, err := time.Parse("2006-01-02", purchaseDate)
+		if err == nil {
+			purchase = &t
+		}
+	} else if existingPurchaseDate != nil {
+		purchase = existingPurchaseDate
+	}
+
+	if warrantyExpireDate != "" {
+		t, err := time.Parse("2006-01-02", warrantyExpireDate)
+		if err == nil {
+			warranty = &t
+		}
+	} else if existingWarrantyExpireDate != nil {
+		warranty = existingWarrantyExpireDate
+	}
+
+	if purchase != nil && warranty != nil {
+		if warranty.Before(*purchase) {
+			return fmt.Errorf("warranty expire date cannot be earlier than purchase date")
+		}
+	}
+
+	return nil
+}
+
 func CreateDevice(c *gin.Context) {
 	var req CreateDeviceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -107,6 +139,11 @@ func CreateDevice(c *gin.Context) {
 	var existingDevice models.Device
 	if err := utils.DB.Where("device_code = ?", req.DeviceCode).First(&existingDevice).Error; err == nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Device code already exists"})
+		return
+	}
+
+	if err := validateWarrantyDate(req.PurchaseDate, req.WarrantyExpireDate, nil, nil); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -156,6 +193,11 @@ func UpdateDevice(c *gin.Context) {
 	var req UpdateDeviceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	if err := validateWarrantyDate(req.PurchaseDate, req.WarrantyExpireDate, device.PurchaseDate, device.WarrantyExpireDate); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
