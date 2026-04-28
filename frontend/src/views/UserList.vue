@@ -130,11 +130,19 @@
           <el-input v-model="form.real_name" placeholder="请输入真实姓名" />
         </el-form-item>
         <el-form-item label="角色" prop="role">
-          <el-select v-model="form.role" placeholder="请选择角色" style="width: 100%">
+          <el-select
+            v-model="form.role"
+            placeholder="请选择角色"
+            style="width: 100%"
+            :disabled="editingUser?.role === 'admin'"
+          >
             <el-option label="普通员工" value="employee" />
             <el-option label="维修技师" value="technician" />
             <el-option label="管理员" value="admin" />
           </el-select>
+          <el-text v-if="editingUser?.role === 'admin'" type="warning" size="small" class="ml-2">
+            管理员角色不可修改
+          </el-text>
         </el-form-item>
         <el-form-item v-if="editingUser" label="状态">
           <el-radio-group v-model="form.status">
@@ -370,6 +378,7 @@ onMounted(() => {
 <style scoped>
 .user-list-container {
   padding: 0;
+  width: 100%;
 }
 
 .card-header {
@@ -380,5 +389,13 @@ onMounted(() => {
 
 .filter-form {
   margin-bottom: 20px;
+}
+
+:deep(.el-card__body) {
+  padding: 20px;
+}
+
+.ml-2 {
+  margin-left: 8px;
 }
 </style>

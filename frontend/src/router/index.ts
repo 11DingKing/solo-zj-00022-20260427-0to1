@@ -1,6 +1,17 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/store/user'
 
+const getRedirectPath = (userStore: ReturnType<typeof useUserStore>) => {
+  if (userStore.isAdmin) {
+    return '/dashboard'
+  } else if (userStore.isTechnician) {
+    return '/work-orders'
+  } else if (userStore.isEmployee) {
+    return '/work-orders/create'
+  }
+  return '/work-orders'
+}
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
@@ -23,9 +34,16 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('@/views/Layout.vue'),
-    redirect: '/dashboard',
     meta: { requiresAuth: true },
     children: [
+      {
+        path: '',
+        redirect: (to) => {
+          const userStore = useUserStore()
+          userStore.initFromStorage()
+          return getRedirectPath(userStore)
+        }
+      },
       {
         path: 'dashboard',
         name: 'Dashboard',
@@ -85,12 +103,15 @@ router.beforeEach(async (to, _from, next) => {
   const userStore = useUserStore()
 
   if (to.meta.requiresAuth !== false && !userStore.isLoggedIn) {
-    next({ name: 'Login', query: { redirect: to.fullPath } })
-    return
+    userStore.initFromStorage()
+    if (!userStore.isLoggedIn) {
+      next({ name: 'Login', query: { redirect: to.fullPath } })
+      return
+    }
   }
 
   if (to.name === 'Login' && userStore.isLoggedIn) {
-    next({ path: '/' })
+    next({ path: getRedirectPath(userStore) })
     return
   }
 

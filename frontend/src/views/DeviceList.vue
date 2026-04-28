@@ -367,6 +367,7 @@ onMounted(() => {
 <style scoped>
 .device-list-container {
   padding: 0;
+  width: 100%;
 }
 
 .card-header {
@@ -377,5 +378,9 @@ onMounted(() => {
 
 .filter-form {
   margin-bottom: 20px;
+}
+
+:deep(.el-card__body) {
+  padding: 20px;
 }
 </style>
