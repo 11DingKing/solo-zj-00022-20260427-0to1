@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS users (
     status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
     phone VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_users_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS devices (
@@ -20,7 +22,9 @@ CREATE TABLE IF NOT EXISTS devices (
     warranty_expire_date DATE,
     status ENUM('active', 'maintenance', 'scrapped') NOT NULL DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_devices_deleted_at (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS work_orders (
@@ -38,6 +42,8 @@ CREATE TABLE IF NOT EXISTS work_orders (
     repair_duration INT COMMENT '维修耗时，单位：分钟',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_work_orders_deleted_at (deleted_at),
     FOREIGN KEY (device_id) REFERENCES devices(id),
     FOREIGN KEY (employee_id) REFERENCES users(id),
     FOREIGN KEY (technician_id) REFERENCES users(id)
@@ -45,12 +51,14 @@ CREATE TABLE IF NOT EXISTS work_orders (
 
 CREATE TABLE IF NOT EXISTS images (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    work_order_id INT NOT NULL,
-    image_type ENUM('before', 'after') NOT NULL,
+    work_order_id INT DEFAULT NULL,
+    image_type ENUM('before', 'after') NOT NULL DEFAULT 'before',
     file_path VARCHAR(500) NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     file_size INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_images_deleted_at (deleted_at),
     FOREIGN KEY (work_order_id) REFERENCES work_orders(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -63,14 +71,17 @@ CREATE TABLE IF NOT EXISTS operation_logs (
     new_status ENUM('pending_assign', 'assigned', 'processing', 'pending_confirm', 'closed'),
     remark TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_operation_logs_deleted_at (deleted_at),
     FOREIGN KEY (work_order_id) REFERENCES work_orders(id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- password: 123456
 INSERT INTO users (username, password, real_name, role, status, phone) VALUES 
-('admin', '$2a$10$r5F5F5F5F5F5F5F5F5F5FOoH5oH5oH5oH5oH5oH5oH5oH5oH5oH', '系统管理员', 'admin', 'active', '13800138000'),
-('employee1', '$2a$10$r5F5F5F5F5F5F5F5F5F5FOoH5oH5oH5oH5oH5oH5oH5oH5oH5oH', '张三', 'employee', 'active', '13800138001'),
-('tech1', '$2a$10$r5F5F5F5F5F5F5F5F5F5FOoH5oH5oH5oH5oH5oH5oH5oH5oH5oH', '李四', 'technician', 'active', '13800138002');
+('admin', '$2a$10$dGcsllk.MEE8Np4llafjturWicVDnZ/7X81.kXXPa877dTQgYZ.Ky', '系统管理员', 'admin', 'active', '13800138000'),
+('employee1', '$2a$10$dGcsllk.MEE8Np4llafjturWicVDnZ/7X81.kXXPa877dTQgYZ.Ky', '张三', 'employee', 'active', '13800138001'),
+('tech1', '$2a$10$dGcsllk.MEE8Np4llafjturWicVDnZ/7X81.kXXPa877dTQgYZ.Ky', '李四', 'technician', 'active', '13800138002');
 
 INSERT INTO devices (device_code, name, model, location, purchase_date, warranty_expire_date) VALUES 
 ('DEV001', '台式电脑', 'Dell OptiPlex 7010', '办公区A-101', '2022-01-15', '2025-01-15'),

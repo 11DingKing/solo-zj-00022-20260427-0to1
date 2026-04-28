@@ -22,7 +22,7 @@
             <el-option
               v-for="device in devices"
               :key="device.id"
-              :label="`${device.device_code} - ${device.name}"
+              :label="`${device.device_code} - ${device.name}`"
               :value="device.id"
             />
           </el-select>

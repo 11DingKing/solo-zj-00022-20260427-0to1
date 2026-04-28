@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   mysql:
-    image: mysql:8
+    image: mysql:8.0
     container_name: repair_system_mysql
     environment:
       MYSQL_ROOT_PASSWORD: repair_root_123
@@ -51,7 +51,7 @@ services:
       dockerfile: Dockerfile
     container_name: repair_system_frontend
     ports:
-      - "80:80"
+      - "3000:80"
     depends_on:
       - backend
     networks:

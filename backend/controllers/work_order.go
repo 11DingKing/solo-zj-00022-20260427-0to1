@@ -5,7 +5,6 @@ import (
 	"repair-system/models"
 	"repair-system/utils"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -158,7 +157,8 @@ func CreateWorkOrder(c *gin.Context) {
 		for _, imgID := range req.BeforeImageIDs {
 			var image models.Image
 			if err := tx.First(&image, imgID).Error; err == nil {
-				image.WorkOrderID = workOrder.ID
+				woID := workOrder.ID
+				image.WorkOrderID = &woID
 				image.ImageType = models.ImageTypeBefore
 				tx.Save(&image)
 			}
@@ -373,7 +373,8 @@ func SubmitRepair(c *gin.Context) {
 		for _, imgID := range req.AfterImageIDs {
 			var image models.Image
 			if err := tx.First(&image, imgID).Error; err == nil {
-				image.WorkOrderID = workOrder.ID
+				woID := workOrder.ID
+				image.WorkOrderID = &woID
 				image.ImageType = models.ImageTypeAfter
 				tx.Save(&image)
 			}
