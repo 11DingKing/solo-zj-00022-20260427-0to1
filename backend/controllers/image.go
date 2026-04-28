@@ -51,7 +51,7 @@ func UploadImage(c *gin.Context) {
 
 	fileName := fmt.Sprintf("%s%s", uuid.New().String(), ext)
 	filePath := filepath.Join(fullDir, fileName)
-	relativePath := filepath.Join(dateDir, fileName)
+	relativePath := fmt.Sprintf("%s/%s", dateDir, fileName)
 
 	if err := c.SaveUploadedFile(file, filePath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})

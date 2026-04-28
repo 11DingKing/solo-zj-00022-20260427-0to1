@@ -254,6 +254,7 @@ onMounted(() => {
 <style scoped>
 .work-order-list-container {
   padding: 0;
+  width: 100%;
 }
 
 .card-header {
@@ -270,5 +271,9 @@ onMounted(() => {
   margin-top: 20px;
   display: flex;
   justify-content: flex-end;
+}
+
+:deep(.el-card__body) {
+  padding: 20px;
 }
 </style>
